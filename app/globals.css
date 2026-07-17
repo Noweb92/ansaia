@@ -1,0 +1,222 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #0b1f3f;
+  --color-navy2: #0e2a5c;
+  --color-navy3: #081831;
+  --color-cyan: #22d3ee;
+  --color-teal: #0891b2;
+  --color-ink: #e6edf7;
+  --color-muted: #9fb0c8;
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI",
+    Helvetica, Arial, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+body {
+  background: linear-gradient(160deg, var(--color-navy2), var(--color-navy3) 60%)
+    fixed;
+  color: var(--color-ink);
+}
+
+section {
+  scroll-margin-top: 88px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 12px 26px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s,
+    background 0.15s;
+  cursor: pointer;
+}
+.btn:focus-visible {
+  outline: 2px solid var(--color-cyan);
+  outline-offset: 3px;
+}
+.btn-primary {
+  background: var(--color-cyan);
+  color: var(--color-navy3);
+  box-shadow: 0 4px 24px rgba(34, 211, 238, 0.35);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+}
+.btn-ghost {
+  border: 1px solid rgba(34, 211, 238, 0.5);
+  color: var(--color-cyan);
+}
+.btn-ghost:hover {
+  background: rgba(34, 211, 238, 0.1);
+}
+
+/* Cards */
+.card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(34, 211, 238, 0.14);
+  border-radius: 16px;
+  padding: 30px;
+  transition:
+    transform 0.2s,
+    border-color 0.2s;
+}
+.card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(34, 211, 238, 0.45);
+}
+
+/* Section kicker */
+.kicker {
+  color: var(--color-cyan);
+  letter-spacing: 0.22em;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* Hero pulse */
+@keyframes pulse-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(0.6);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 0;
+  }
+}
+.pulse {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  width: 720px;
+  height: 720px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(34, 211, 238, 0.12);
+  pointer-events: none;
+  animation: pulse-ring 4s ease-out infinite;
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.6s,
+    transform 0.6s;
+}
+.reveal.vis {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Form fields (onboarding) */
+.field-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--color-cyan);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.field-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: var(--color-ink);
+  background: rgba(255, 255, 255, 0.05);
+}
+.field-input::placeholder {
+  color: rgba(159, 176, 200, 0.55);
+}
+.field-input:focus {
+  outline: none;
+  border-color: var(--color-cyan);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
+}
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  color: var(--color-ink);
+}
+.check-label input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-cyan);
+  flex: none;
+}
+
+/* Print (Download as PDF on /welcome) */
+@media print {
+  body {
+    background: #fff !important;
+    color: #26374f;
+  }
+  nav,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+  .print-block {
+    display: block !important;
+  }
+  .card,
+  .field-input {
+    background: #fff !important;
+    border-color: #d8e0ea !important;
+    color: #26374f !important;
+    box-shadow: none !important;
+  }
+  .field-label,
+  .kicker {
+    color: #0891b2 !important;
+  }
+  h1,
+  h2,
+  h3,
+  legend {
+    color: #0b1f3f !important;
+  }
+  p,
+  li,
+  .check-label,
+  td,
+  th {
+    color: #26374f !important;
+  }
+}

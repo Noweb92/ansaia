@@ -46,16 +46,23 @@ function Slider({
   );
 }
 
+const round10 = (n: number) => Math.round(n / 10) * 10;
+
 export default function RoiCalculator() {
   const [missed, setMissed] = useState(20);
-  const [bookingShare, setBookingShare] = useState(60);
+  const [bookingShare, setBookingShare] = useState(50);
   const [avgSpend, setAvgSpend] = useState(120);
+  const [takeawayShare, setTakeawayShare] = useState(30);
+  const [avgOrder, setAvgOrder] = useState(45);
   const tracked = useRef(false);
 
-  const monthlyLoss =
-    Math.round(
-      (missed * (bookingShare / 100) * avgSpend * WEEKS_PER_MONTH) / 10,
-    ) * 10;
+  const bookingLoss = round10(
+    missed * (bookingShare / 100) * avgSpend * WEEKS_PER_MONTH,
+  );
+  const takeawayLoss = round10(
+    missed * (takeawayShare / 100) * avgOrder * WEEKS_PER_MONTH,
+  );
+  const monthlyLoss = bookingLoss + takeawayLoss;
   const essential = PLANS[0].prices.twelve.monthly;
   const multiple = monthlyLoss > 0 ? Math.round(monthlyLoss / essential) : 0;
 
@@ -67,6 +74,16 @@ export default function RoiCalculator() {
     fn(v);
   };
 
+  // The two shares describe the same pool of missed calls — cap their sum at 100%.
+  const setBooking = (v: number) => {
+    setBookingShare(v);
+    if (v + takeawayShare > 100) setTakeawayShare(100 - v);
+  };
+  const setTakeaway = (v: number) => {
+    setTakeawayShare(v);
+    if (v + bookingShare > 100) setBookingShare(100 - v);
+  };
+
   return (
     <section id="calculator" className="px-6 py-20">
       <div className="mx-auto max-w-[1100px]">
@@ -74,8 +91,8 @@ export default function RoiCalculator() {
         <h2 className="mb-12 mt-2.5 text-center text-[clamp(1.7rem,4vw,2.4rem)] font-bold">
           What are missed calls costing you?
         </h2>
-        <div className="card mx-auto grid max-w-[900px] gap-10 !p-8 md:grid-cols-[1.2fr_1fr] md:!p-10">
-          <div className="flex flex-col gap-7">
+        <div className="card mx-auto grid max-w-[940px] gap-10 !p-8 md:grid-cols-[1.2fr_1fr] md:!p-10">
+          <div className="flex flex-col gap-6">
             <Slider
               label="Calls you miss per week"
               value={missed}
@@ -85,24 +102,56 @@ export default function RoiCalculator() {
               format={(v) => `${v}`}
               onChange={onInteract(setMissed)}
             />
-            <Slider
-              label="Share that were trying to book"
-              value={bookingShare}
-              min={0}
-              max={100}
-              step={5}
-              format={(v) => `${v}%`}
-              onChange={onInteract(setBookingShare)}
-            />
-            <Slider
-              label="Average spend per booking"
-              value={avgSpend}
-              min={20}
-              max={300}
-              step={10}
-              format={(v) => `$${v}`}
-              onChange={onInteract(setAvgSpend)}
-            />
+            <div className="mt-1 border-t border-white/10 pt-5">
+              <p className="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-cyan/80">
+                Bookings
+              </p>
+              <div className="flex flex-col gap-6">
+                <Slider
+                  label="Share that were trying to book"
+                  value={bookingShare}
+                  min={0}
+                  max={100}
+                  step={5}
+                  format={(v) => `${v}%`}
+                  onChange={onInteract(setBooking)}
+                />
+                <Slider
+                  label="Average spend per booking"
+                  value={avgSpend}
+                  min={20}
+                  max={300}
+                  step={10}
+                  format={(v) => `$${v}`}
+                  onChange={onInteract(setAvgSpend)}
+                />
+              </div>
+            </div>
+            <div className="mt-1 border-t border-white/10 pt-5">
+              <p className="mb-4 text-xs font-bold uppercase tracking-[0.15em] text-cyan/80">
+                Takeaway phone orders
+              </p>
+              <div className="flex flex-col gap-6">
+                <Slider
+                  label="Share that were trying to order"
+                  value={takeawayShare}
+                  min={0}
+                  max={100}
+                  step={5}
+                  format={(v) => `${v}%`}
+                  onChange={onInteract(setTakeaway)}
+                />
+                <Slider
+                  label="Average order value"
+                  value={avgOrder}
+                  min={10}
+                  max={150}
+                  step={5}
+                  format={(v) => `$${v}`}
+                  onChange={onInteract(setAvgOrder)}
+                />
+              </div>
+            </div>
           </div>
           <div className="flex flex-col items-center justify-center rounded-xl border border-cyan/25 bg-navy3/60 p-6 text-center">
             <div className="text-sm uppercase tracking-[0.15em] text-muted">
@@ -114,6 +163,10 @@ export default function RoiCalculator() {
             >
               ${monthlyLoss.toLocaleString("en-AU")}
               <span className="text-lg font-normal text-muted">/month</span>
+            </div>
+            <div className="mb-3 text-[0.85rem] text-muted">
+              ${bookingLoss.toLocaleString("en-AU")} in bookings + $
+              {takeawayLoss.toLocaleString("en-AU")} in takeaway
             </div>
             <div className="text-[0.95rem] text-muted">
               ANSA starts at{" "}

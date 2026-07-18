@@ -38,7 +38,19 @@ Project → Settings → Environment Variables.
 | `NEXT_PUBLIC_META_PIXEL_ID` | No       | Meta (Facebook) Pixel ID. **Disabled by default** — the pixel only loads if this is set. |
 
 Vercel Analytics is included and needs zero config — it activates
-automatically once deployed on Vercel.
+automatically once deployed on Vercel. Custom conversion events are
+instrumented (`call_click`, `email_click`, `calendly_click`,
+`stripe_checkout`, `calculator_used`, `onboarding_submitted`) — note that
+custom events require a Vercel Pro plan to appear in the dashboard; on the
+free (Hobby) plan only page views are recorded.
+
+## Calendly
+
+"Book a demo online" buttons point to `SITE.calendlyUrl` in `lib/site.ts`
+(currently the generic `calendly.com/nowebcontact/30min`). Recommended:
+create a dedicated **"ANSA demo — 15 min"** event type in Calendly and set
+the account timezone to Perth (it is currently America/New_York), then update
+the URL in `lib/site.ts`.
 
 ## Stripe
 
@@ -68,11 +80,12 @@ breakdown before the click so there are no surprises at checkout.
 Also worth doing before launch (not blocking):
 
 - Set `RESEND_API_KEY` + verify the `ansaia.com.au` domain in Resend so the
-  onboarding form emails itself (otherwise mailto fallback).
-- Replace the ABN placeholder in `lib/site.ts` (`SITE.abn`) once the ABN is
-  issued — it appears in the footer and Terms.
+  onboarding form emails itself (otherwise mailto fallback; the uploaded menu
+  is attached to the email when Resend is configured).
 - Have the Terms reviewed by an Australian solicitor (adapted from the Mia
   draft, which was pending legal review).
+- Add real testimonials to `TESTIMONIALS` in `lib/site.ts` as they come in —
+  the section appears automatically. Never invent one.
 
 ## Structure
 

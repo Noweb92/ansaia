@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 const TO_EMAIL = "contact@ansaia.com.au";
 const FROM_EMAIL = process.env.RESEND_FROM ?? "ANSA Onboarding <onboarding@ansaia.com.au>";
+const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // base64 of a ~6 MB file
+
+interface Attachment {
+  filename: string;
+  content: string; // base64
+}
 
 function escapeHtml(s: string) {
   return s
@@ -30,7 +36,14 @@ function buildHtml(entries: Record<string, string>) {
 
 async function sendEmail(
   apiKey: string,
-  payload: { from: string; to: string[]; subject: string; html: string; reply_to?: string },
+  payload: {
+    from: string;
+    to: string[];
+    subject: string;
+    html: string;
+    reply_to?: string;
+    attachments?: Attachment[];
+  },
 ) {
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -47,7 +60,7 @@ async function sendEmail(
 }
 
 export async function POST(req: NextRequest) {
-  let entries: Record<string, string>;
+  let entries: Record<string, unknown>;
   try {
     entries = await req.json();
   } catch {
@@ -58,9 +71,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ sent: false, error: "Invalid payload" }, { status: 400 });
   }
 
+  // Honeypot: bots fill the hidden "company_website" field. Pretend success.
+  if (typeof entries["company_website"] === "string" && entries["company_website"].trim() !== "") {
+    return NextResponse.json({ sent: true });
+  }
+
+  // Optional menu attachment
+  let attachment: Attachment | undefined;
+  const rawFile = entries["_menuFile"];
+  if (
+    rawFile &&
+    typeof rawFile === "object" &&
+    typeof (rawFile as Attachment).filename === "string" &&
+    typeof (rawFile as Attachment).content === "string" &&
+    (rawFile as Attachment).content.length <= MAX_ATTACHMENT_BYTES
+  ) {
+    const { filename, content } = rawFile as Attachment;
+    attachment = { filename: filename.slice(0, 120).replace(/[\r\n"]/g, "_"), content };
+  }
+
   // Sanitise: strings only, sane sizes
   const clean: Record<string, string> = {};
   for (const [k, v] of Object.entries(entries)) {
+    if (k === "_menuFile" || k === "company_website") continue;
     if (typeof v === "string" && k.length <= 120 && v.length <= 4000) {
       clean[k] = v;
     }
@@ -86,6 +119,7 @@ export async function POST(req: NextRequest) {
       subject: `Onboarding form — ${venue}`,
       html,
       reply_to: clientEmail,
+      attachments: attachment ? [attachment] : undefined,
     });
 
     if (clientEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail)) {

@@ -181,6 +181,36 @@ section {
   flex: none;
 }
 
+/* Stepper: inactive steps hidden on screen, all visible in print */
+.step-hidden {
+  display: none;
+}
+
+/* Range sliders (ROI calculator) */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-cyan);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.5);
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-cyan);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.5);
+  cursor: pointer;
+}
+input[type="range"]:focus-visible {
+  outline: 2px solid var(--color-cyan);
+  outline-offset: 4px;
+}
+
 /* Print (Download as PDF on /welcome) */
 @media print {
   body {
@@ -192,7 +222,7 @@ section {
   .no-print {
     display: none !important;
   }
-  .print-block {
+  .step-hidden {
     display: block !important;
   }
   .card,
